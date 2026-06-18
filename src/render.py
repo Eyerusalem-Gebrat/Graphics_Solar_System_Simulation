@@ -1,15 +1,21 @@
 import math
 from OpenGL.GL import *
 
-def draw_circle(x, y, radius, color, filled=True, segments=64):
+
+def draw_circle(x, y, radius, color, filled=True):
+
     glColor3f(*color)
+
+    segments = 64
 
     if filled:
         glBegin(GL_TRIANGLE_FAN)
+
         glVertex2f(x, y)
 
         for i in range(segments + 1):
             angle = 2 * math.pi * i / segments
+
             glVertex2f(
                 x + radius * math.cos(angle),
                 y + radius * math.sin(angle)
@@ -22,6 +28,7 @@ def draw_circle(x, y, radius, color, filled=True, segments=64):
 
         for i in range(segments):
             angle = 2 * math.pi * i / segments
+
             glVertex2f(
                 x + radius * math.cos(angle),
                 y + radius * math.sin(angle)
@@ -31,14 +38,21 @@ def draw_circle(x, y, radius, color, filled=True, segments=64):
 
 
 def draw_orbit_ring(radius, color=(0.4, 0.4, 0.4)):
-    draw_circle(0, 0, radius, color, filled=False)
+    draw_circle(
+        0,
+        0,
+        radius,
+        color,
+        filled=False
+    )
 
 
 def draw_sun(x, y, radius):
+
     draw_circle(
         x,
         y,
-        radius * 1.3,
+        radius * 1.4,
         (1.0, 0.8, 0.2),
         filled=True
     )
@@ -53,8 +67,14 @@ def draw_sun(x, y, radius):
 
 
 def draw_body(body):
+
     if body.name.lower() == "sun":
-        draw_sun(0, 0, body.radius)
+        draw_sun(
+            0,
+            0,
+            body.radius
+        )
+
     else:
         draw_circle(
             0,
