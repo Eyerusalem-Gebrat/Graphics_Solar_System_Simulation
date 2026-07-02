@@ -40,7 +40,7 @@ PREREQUISITES
   - Windows: usually bundled with PyOpenGL
 
 RUNNING IT
-cd src
-python main.py
+- cd src
+- python main.py
 
 A window titled "3D Solar System Simulation" will open and the simulation starts immediately.
