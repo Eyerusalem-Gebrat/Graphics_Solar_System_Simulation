@@ -1,44 +1,73 @@
-# simulation.py
-
-sim_time = 0.0
-speed_multiplier = 1.0
-paused = False
+import math
+from OpenGL.GL import *
+from OpenGL.GLUT import *
 
 
-def update(delta):
-    global sim_time
+def draw_orbit_ring(radius, color=(0.4, 0.4, 0.4)):
+    """
+    Draw a flat circular orbital ring in 3D (XY plane) with lighting disabled.
+    """
+    glDisable(GL_LIGHTING)
+    glColor3f(*color)
 
-    if not paused:
-        sim_time += delta * speed_multiplier
+    segments = 128
+    glBegin(GL_LINE_LOOP)
+    for i in range(segments):
+        angle = 2 * math.pi * i / segments
+        glVertex3f(radius * math.cos(angle), radius * math.sin(angle), 0.0)
+    glEnd()
 
-
-def get_time():
-    return sim_time
-
-
-def get_speed():
-    return speed_multiplier
-
-
-def is_paused():
-    return paused
+    glEnable(GL_LIGHTING)
 
 
-def increase_speed():
-    global speed_multiplier
-    speed_multiplier += 0.5
+def draw_sun(radius):
+    """
+    Draw the Sun as a luminous, unshaded body (corona and core spheres).
+    """
+    glDisable(GL_LIGHTING)
+
+    # Luminous Sun corona (outer glow)
+    glColor3f(1.0, 0.8, 0.2)
+    glutSolidSphere(radius * 1.2, 32, 32)
+
+    # Luminous Sun core
+    glColor3f(1.0, 1.0, 0.0)
+    glutSolidSphere(radius, 32, 32)
+
+    glEnable(GL_LIGHTING)
 
 
-def decrease_speed():
-    global speed_multiplier
-    speed_multiplier = max(0.1, speed_multiplier - 0.5)
+def draw_body(body):
+    """
+    Draw a celestial body (Sun, regular planet, or Saturn with its custom rings).
+    """
+    name_lower = body.name.lower()
 
+    if name_lower == "sun":
+        draw_sun(body.radius)
 
-def reverse_time():
-    global speed_multiplier
-    speed_multiplier = -speed_multiplier
+    elif name_lower == "saturn":
+        # Draw Saturn sphere
+        glEnable(GL_LIGHTING)
+        glColor3f(*body.color)
+        glutSolidSphere(body.radius, 32, 32)
 
+        # Draw Saturn's rings (dusty flat disc in XY plane)
+        glDisable(GL_LIGHTING)
+        glColor3f(0.75, 0.70, 0.55)
+        segments = 64
+        # Draw multiple concentric rings to simulate a solid/textured ring structure
+        for r_factor in [1.35, 1.45, 1.55, 1.65, 1.75, 1.85]:
+            glBegin(GL_LINE_LOOP)
+            for i in range(segments):
+                angle = 2 * math.pi * i / segments
+                glVertex3f(body.radius * r_factor * math.cos(angle), body.radius * r_factor * math.sin(angle), 0.0)
+            glEnd()
+        glEnable(GL_LIGHTING)
 
-def toggle_pause():
-    global paused
-    paused = not paused
+    else:
+        # Standard planet or moon
+        glEnable(GL_LIGHTING)
+        glColor3f(*body.color)
+        glutSolidSphere(body.radius, 32, 32)
+

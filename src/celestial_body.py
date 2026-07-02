@@ -1,4 +1,4 @@
-cclass CelestialBody:
+class CelestialBody:
 
     def __init__(
         self,
