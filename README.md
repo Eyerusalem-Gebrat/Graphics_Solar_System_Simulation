@@ -1,9 +1,7 @@
 # Graphics Solar System Simulation
-
 A real-time 3D solar system simulation built with Python and PyOpenGL. The Sun and eight planets (plus a couple of moons) orbit and rotate continuously, with a mouse-controlled camera and an on-screen HUD showing simulation status and controls.
 
 WHAT IT DOES
-
 The program opens a window and renders the Sun at the center with Mercury, Venus, Earth (with its Moon), Mars, Jupiter (with its moon Io), Saturn (with rings), Uranus, and Neptune all orbiting around it. Each body spins on its own axis while orbiting at its own speed. You can freely rotate and zoom the camera around the scene, and control the flow of time (pause, reverse, speed up, slow down) while it runs.
 
 FEATURES
