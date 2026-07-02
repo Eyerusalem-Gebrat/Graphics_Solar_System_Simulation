@@ -1,85 +1,75 @@
-from OpenGL.GL import *
-from OpenGL.GLUT import *
-from OpenGL.GLU import *
+import pygame
+import sys
+import random
 
 import simulation
-import input_handler
 from solar_system import draw_solar_system
+from input_handler import handle_keys
+from renderer import draw_stars
+
+WIDTH, HEIGHT = 1920, 1080
+FPS = 60
 
 
-# Window size
-WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 800
-
-# Time between frames (milliseconds)
-FRAME_TIME = 16      # ~60 FPS
-
-
-def init():
-    glClearColor(0.0, 0.0, 0.0, 1.0)
-
-    # Projection
-    glMatrixMode(GL_PROJECTION)
-    glLoadIdentity()
-
-    # Left, Right, Bottom, Top, Near, Far
-    glOrtho(-250, 250, -250, 250, -1, 1)
-
-    glMatrixMode(GL_MODELVIEW)
+def generate_stars(width, height, count=300):
+    stars = []
+    for _ in range(count):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        brightness = random.randint(100, 255)
+        stars.append((x, y, brightness))
+    return stars
 
 
-def display():
-    """
-    Render one frame.
-    """
-
-    glClear(GL_COLOR_BUFFER_BIT)
-    glLoadIdentity()
-
-    draw_solar_system(
-        simulation.get_time(),
-        simulation.get_speed()
+def draw_status(surface, font, speed, paused):
+    surface.blit(
+        font.render(f"Speed: {speed:.1f}x", True, (255, 255, 255)), (20, 20)
     )
-
-    input_handler.draw_status()
-
-    glutSwapBuffers()
-
-
-def timer(value):
-    """
-    Update simulation every frame.
-    """
-
-    # Advance simulation
-    simulation.update(0.016)
-
-    # Request redraw
-    glutPostRedisplay()
-
-    # Register next timer callback
-    glutTimerFunc(FRAME_TIME, timer, 0)
+    surface.blit(
+        font.render(
+            "Controls:  +/-  Speed  |  P  Pause  |  R  Reverse  |  Q  Quit",
+            True, (180, 180, 180)
+        ), (20, 50)
+    )
+    if paused:
+        surface.blit(font.render("PAUSED", True, (255, 80, 80)), (20, 80))
 
 
 def main():
+    pygame.init()
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.FULLSCREEN)
+    pygame.display.set_caption("Solar System Simulation")
+    clock = pygame.time.Clock()
+    font = pygame.font.SysFont("Arial", 22)
 
-    glutInit()
+    # True center of screen
+    cx = screen.get_width() // 2
+    cy = screen.get_height() // 2
 
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
+    stars = generate_stars(screen.get_width(), screen.get_height(), 300)
 
-    glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                handle_keys(event)
 
-    glutCreateWindow(b"2D Solar System Simulation")
+        dt = clock.tick(FPS) / 1000.0
+        simulation.update(dt)
 
-    init()
+        screen.fill((5, 5, 15))
+        draw_stars(screen, stars)
 
-    glutDisplayFunc(display)
+        draw_solar_system(
+            screen, cx, cy,
+            simulation.get_time(),
+            simulation.get_speed()
+        )
 
-    glutKeyboardFunc(input_handler.keyboard)
-
-    glutTimerFunc(FRAME_TIME, timer, 0)
-
-    glutMainLoop()
+        draw_status(screen, font, simulation.get_speed(), simulation.is_paused())
+        pygame.display.flip()
 
 
 if __name__ == "__main__":

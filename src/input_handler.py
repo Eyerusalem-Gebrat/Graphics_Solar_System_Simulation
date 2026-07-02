@@ -1,52 +1,22 @@
-# input_handler.py
-
-from OpenGL.GL import *
-from OpenGL.GLUT import *
 import sys
-
+import pygame
 import simulation
 
 
-def keyboard(key, x, y):
+def handle_keys(event):
+    if event.type != pygame.KEYDOWN:
+        return
 
-    key = key.decode("utf-8")
+    key = event.key
 
-    if key == "+":
+    if key in (pygame.K_EQUALS, pygame.K_PLUS, pygame.K_KP_PLUS):
         simulation.increase_speed()
-
-    elif key == "-":
+    elif key in (pygame.K_MINUS, pygame.K_KP_MINUS):
         simulation.decrease_speed()
-
-    elif key == "r":
+    elif key in (pygame.K_r, pygame.K_RSHIFT):
         simulation.reverse_time()
-
-    elif key == "p":
+    elif key == pygame.K_p:
         simulation.toggle_pause()
-
-    elif key == "q":
-        sys.exit()
-
-    elif ord(key) == 27:   # ESC key
-        sys.exit()
-
-
-def draw_text(x, y, text):
-
-    glRasterPos2f(x, y)
-
-    for char in text:
-        glutBitmapCharacter(
-            GLUT_BITMAP_HELVETICA_18,
-            ord(char)
-        )
-
-
-def draw_status():
-
-    speed = simulation.get_speed()
-    paused = simulation.is_paused()
-
-    draw_text(-95, 90, f"Speed: {speed:.1f}x")
-
-    if paused:
-        draw_text(-95, 80, "PAUSED")
+    elif key in (pygame.K_q, pygame.K_ESCAPE):
+        pygame.quit()
+        sys.exit(0)
