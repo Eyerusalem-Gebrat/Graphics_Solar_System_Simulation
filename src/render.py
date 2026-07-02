@@ -1,81 +1,73 @@
-import pygame
 import math
-
-TILT = 0.38
-
-
-def draw_stars(surface, stars):
-    for (x, y, brightness) in stars:
-        pygame.draw.circle(surface, (brightness, brightness, brightness), (x, y), 1)
+from OpenGL.GL import *
+from OpenGL.GLUT import *
 
 
-def draw_orbit_ring(surface, cx, cy, orbit_radius):
-    segments = 120
-    points = []
+def draw_orbit_ring(radius, color=(0.4, 0.4, 0.4)):
+    """
+    Draw a flat circular orbital ring in 3D (XY plane) with lighting disabled.
+    """
+    glDisable(GL_LIGHTING)
+    glColor3f(*color)
+
+    segments = 128
+    glBegin(GL_LINE_LOOP)
     for i in range(segments):
         angle = 2 * math.pi * i / segments
-        x = cx + orbit_radius * math.cos(angle)
-        y = cy + orbit_radius * math.sin(angle) * TILT
-        points.append((int(x), int(y)))
-    pygame.draw.polygon(surface, (40, 40, 90), points, 1)
+        glVertex3f(radius * math.cos(angle), radius * math.sin(angle), 0.0)
+    glEnd()
+
+    glEnable(GL_LIGHTING)
 
 
-def draw_planet(surface, x, y, radius, color, is_sun=False):
-    ix, iy, ir = int(x), int(y), int(radius)
+def draw_sun(radius):
+    """
+    Draw the Sun as a luminous, unshaded body (corona and core spheres).
+    """
+    glDisable(GL_LIGHTING)
 
-    if is_sun:
-        # Glow layers
-        for glow in range(5, 0, -1):
-            alpha_surf = pygame.Surface(
-                (ir * 2 + glow * 14, ir * 2 + glow * 14), pygame.SRCALPHA
-            )
-            glow_alpha = max(0, 35 - glow * 6)
-            pygame.draw.circle(
-                alpha_surf,
-                (255, 160, 0, glow_alpha),
-                (ir + glow * 7, ir + glow * 7),
-                ir + glow * 7
-            )
-            surface.blit(alpha_surf, (ix - ir - glow * 7, iy - ir - glow * 7))
+    # Luminous Sun corona (outer glow)
+    glColor3f(1.0, 0.8, 0.2)
+    glutSolidSphere(radius * 1.2, 32, 32)
 
-        # Sun core
-        pygame.draw.circle(surface, (255, 220, 0), (ix, iy), ir)
-        # Bright center
-        pygame.draw.circle(surface, (255, 255, 180), (ix, iy), ir // 2)
+    # Luminous Sun core
+    glColor3f(1.0, 1.0, 0.0)
+    glutSolidSphere(radius, 32, 32)
+
+    glEnable(GL_LIGHTING)
+
+
+def draw_body(body):
+    """
+    Draw a celestial body (Sun, regular planet, or Saturn with its custom rings).
+    """
+    name_lower = body.name.lower()
+
+    if name_lower == "sun":
+        draw_sun(body.radius)
+
+    elif name_lower == "saturn":
+        # Draw Saturn sphere
+        glEnable(GL_LIGHTING)
+        glColor3f(*body.color)
+        glutSolidSphere(body.radius, 32, 32)
+
+        # Draw Saturn's rings (dusty flat disc in XY plane)
+        glDisable(GL_LIGHTING)
+        glColor3f(0.75, 0.70, 0.55)
+        segments = 64
+        # Draw multiple concentric rings to simulate a solid/textured ring structure
+        for r_factor in [1.35, 1.45, 1.55, 1.65, 1.75, 1.85]:
+            glBegin(GL_LINE_LOOP)
+            for i in range(segments):
+                angle = 2 * math.pi * i / segments
+                glVertex3f(body.radius * r_factor * math.cos(angle), body.radius * r_factor * math.sin(angle), 0.0)
+            glEnd()
+        glEnable(GL_LIGHTING)
 
     else:
-        # Base color
-        pygame.draw.circle(surface, color, (ix, iy), ir)
+        # Standard planet or moon
+        glEnable(GL_LIGHTING)
+        glColor3f(*body.color)
+        glutSolidSphere(body.radius, 32, 32)
 
-        # Highlight top-left
-        highlight = (
-            min(255, color[0] + 80),
-            min(255, color[1] + 80),
-            min(255, color[2] + 80)
-        )
-        pygame.draw.circle(
-            surface, highlight,
-            (ix - ir // 3, iy - ir // 3),
-            max(1, ir // 3)
-        )
-
-        # Shadow bottom-right
-        shadow_surf = pygame.Surface((ir * 2, ir * 2), pygame.SRCALPHA)
-        pygame.draw.circle(
-            shadow_surf, (0, 0, 0, 140),
-            (ir + ir // 4, ir + ir // 4),
-            ir
-        )
-        surface.blit(shadow_surf, (ix - ir, iy - ir))
-
-
-def draw_saturn_rings(surface, x, y, radius):
-    ix, iy = int(x), int(y)
-    for ring_r in range(int(radius * 1.4), int(radius * 2.2), 4):
-        points = []
-        for i in range(80):
-            angle = 2 * math.pi * i / 80
-            rx = ix + ring_r * math.cos(angle)
-            ry = iy + ring_r * math.sin(angle) * TILT * 0.6
-            points.append((int(rx), int(ry)))
-        pygame.draw.polygon(surface, (180, 160, 100), points, 1)
