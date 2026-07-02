@@ -14,13 +14,13 @@ FEATURES
 - On-screen HUD showing current speed, pause state, and control instructions
 
 FILES
-main.py            - Entry point; sets up the window, render loop, and input callbacks
-simulation.py       - Simulation clock: tracks time, speed, pause, and reverse state
-input_handler.py    - Handles mouse/keyboard input and camera state, draws the HUD
-math_utils.py       - Converts camera angles/distance into a 3D camera position
-celestial_body.py   - Defines the CelestialBody class and sets up the Sun, planets, and moons
-solar_system.py     - Recursively walks the body tree each frame to position and draw everything
-render.py           - Low-level OpenGL drawing code for spheres, rings, and orbit paths
+main.py: entry point; sets up the window, render loop, and input callbacks
+simulation.py: simulation clock: tracks time, speed, pause, and reverse state
+input_handler.py: handles mouse/keyboard input and camera state, draws the HUD
+math_utils.py: converts camera angles/distance into a 3D camera position
+celestial_body.py: defines the CelestialBody class and sets up the Sun, planets, and moons
+solar_system.py: recursively walks the body tree each frame to position and draw everything
+render.py: low-level OpenGL drawing code for spheres, rings, and orbit paths
 
 CONTROLS
 Left-click drag   - Rotate/orbit the camera
